@@ -16,69 +16,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.thomaskavi.workshopmongo.domain.Post;
-import com.thomaskavi.workshopmongo.domain.User;
-import com.thomaskavi.workshopmongo.dto.UserDTO;
-import com.thomaskavi.workshopmongo.services.UserService;
+import com.thomaskavi.workshopmongo.domain.Product;
+import com.thomaskavi.workshopmongo.dto.ProductDTO;
+import com.thomaskavi.workshopmongo.services.ProductService;
 
-// Anotação que indica que esta classe é um controlador REST.
 @RestController
-// Mapeia todas as requisições que começarem com "/users" para esta classe.
-@RequestMapping(value = "/users")
-public class UserResource {
+@RequestMapping(value = "/products")
+public class ProductResource {
 
-	// Injeta automaticamente uma instância de UserService.
 	@Autowired
-	private UserService service;
+	private ProductService service;
 
-	// Mapeia requisições GET para o método findAll, ou seja, quando um usuário
-	// fizer uma requisição GET para "/users".
 	@GetMapping
-	public ResponseEntity<List<UserDTO>> findAll() {
+	public ResponseEntity<List<ProductDTO>> findAll() {
 		// Chama o serviço para buscar todos os usuários.
-		List<User> list = service.findAll();
+		List<Product> list = service.findAll();
 		// Converte a lista de User para uma lista de UserDTO.
-		List<UserDTO> listDto = list.stream().map(x -> new UserDTO(x)).collect(Collectors.toList());
+		List<ProductDTO> listDto = list.stream().map(x -> new ProductDTO(x)).collect(Collectors.toList());
 		// Retorna a lista de UserDTO com o status HTTP 200 (OK).
 		return ResponseEntity.ok().body(listDto);
 	}
 
-	// Mapeia requisições GET para o método findById, ou seja, quando um usuário
-	// fizer uma requisição GET para "/users/{id}".
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<UserDTO> findById(@PathVariable String id) {
+	public ResponseEntity<Product> findById(@PathVariable String id) {
 		// Chama o serviço para buscar o usuário pelo ID.
-		User obj = service.findById(id);
+		Product obj = service.findById(id);
 		// Retorna o UserDTO correspondente com o status HTTP 200 (OK).
-		return ResponseEntity.ok().body(new UserDTO(obj));
+		return ResponseEntity.ok().body(obj);
 	}
-
+	
 	@PostMapping
-	public ResponseEntity<Void> insert(@RequestBody UserDTO objDto) {
-		User obj = service.fromDTO(objDto);
+	public ResponseEntity<Void> insert(@RequestBody ProductDTO objDto) {
+		Product obj = service.fromDTO(objDto);
 		obj = service.insert(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 
 	}
-
+	
 	@DeleteMapping(value = "/{id}")
 	public ResponseEntity<Void> delete(@PathVariable String id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
 	}
-
+	
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Void> update(@RequestBody UserDTO objDto, @PathVariable String id) {
-		User obj = service.fromDTO(objDto);
+	public ResponseEntity<Void> update(@RequestBody ProductDTO objDto, @PathVariable String id) {
+		Product obj = service.fromDTO(objDto);
 		obj.setId(id);
 		obj = service.update(obj);
 		return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping(value = "/{id}/posts")
-	public ResponseEntity<List<Post>> findPosts(@PathVariable String id) {
-		User obj = service.findById(id);
-		return ResponseEntity.ok().body(obj.getPosts());
-	}
 }
